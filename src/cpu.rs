@@ -1,6 +1,9 @@
 use std::convert::From;
 
 use crate::bus::Bus;
+use crate::disassembler::disassemble;
+
+enum Instructions {}
 
 // Cpu flags from f register
 #[derive(Debug)]
@@ -56,12 +59,6 @@ pub struct Cpu {
 
 impl Cpu {
     pub fn new() -> Self {
-        let flags = Flags {
-            z: false,
-            n: false,
-            h: false,
-            c: false,
-        };
         Cpu {
             opcode: 0,
             registers: Registers {
@@ -70,13 +67,56 @@ impl Cpu {
                 c: 0,
                 d: 0,
                 e: 0,
-                f: flags,
+                f: Flags {
+                    z: false,
+                    n: false,
+                    h: false,
+                    c: false,
+                },
                 h: 0,
                 l: 0,
             },
             sp: 0,
             pc: 0,
             bus: Bus::new(),
+        }
+    }
+
+    pub fn tick(&mut self) {
+        let opcode = self.opcode;
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_flags() {
+        let mut cpu = Cpu::new();
+        let flags = Flags {
+            z: true,
+            n: true,
+            h: false,
+            c: false,
+        };
+
+        cpu.registers.f = flags;
+
+        assert_eq!(0xC0, u8::from(cpu.registers.f));
+    }
+
+    #[test]
+    fn test_disassembler() {
+        let mut bus = Bus::new();
+        bus.load_rom("test_roms/06-ld r,r.gb", 0);
+
+        //println!("{:?}", bus.ram);
+
+        let mut pc = 0;
+
+        for _ in 0..1000 {
+            pc += disassemble(&bus.ram, pc);
         }
     }
 }
